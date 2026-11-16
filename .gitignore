@@ -6,3 +6,4 @@ data/*.db
 venv/
 .DS_Store
 *.zip
+*.backup

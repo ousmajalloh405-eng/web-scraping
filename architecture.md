@@ -1,24 +1,36 @@
-# Architecture — Web Scraping
+# Architecture — Pipeline Web Scraping E-commerce
 
-## Flux
+## 1. Vue générale
 
-```
-Site public (quotes.toscrape.com)
-          │
-          ▼
-    extract.py
-  (requests + BeautifulSoup)
-          │
-          ▼
-   transform.py
-          │
-          ▼
-     load.py
-          │
-          ▼
-   citations.db
-```
+Le projet suit une architecture ETL en trois étapes :
 
-## Table `citations`
+1. Extract : collecte des produits et des avis.
+2. Transform : nettoyage et validation.
+3. Load : stockage dans SQLite.
 
-- citation, auteur, tags, page, longueur
+## 2. Flux de données
+
+```text
+web-scraping.dev
+       |
+       v
+src/extract.py
+       |
+       v
+Catalogue HTML
+Fiches produits
+API JSON des avis
+       |
+       v
+src/transform.py
+       |
+       v
+Nettoyage et validation
+       |
+       v
+src/load.py
+       |
+       v
+data/ecommerce.db
+      /       \
+ products    reviews

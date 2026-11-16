@@ -1,50 +1,55 @@
-"""Pipeline Web Scraping — Citations."""
+"""Pipeline de collecte et d'analyse des avis e-commerce."""
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from extract import extraire_citations
+from extract import extraire_donnees
 from transform import transformer
-from load import initialiser_base, charger
+from load import initialiser_base, charger, afficher_statistiques
 
 
-DB_PATH = Path(__file__).parent / "data" / "citations.db"
-
-
-def afficher_resume(conn):
-    print("\n=== Résumé ===")
-    total = conn.execute("SELECT COUNT(*) FROM citations").fetchone()[0]
-    print(f"Total citations : {total}")
-
-    print("\nTop auteurs :")
-    for row in conn.execute("""
-        SELECT auteur, COUNT(*) AS nb
-        FROM citations
-        GROUP BY auteur
-        ORDER BY nb DESC
-        LIMIT 5
-    """):
-        print(f"  {row[0]:25} {row[1]} citations")
+DB_PATH = Path(__file__).parent / "data" / "ecommerce.db"
 
 
 def main():
-    print("=== Pipeline Web Scraping ===\n")
+    print("=" * 55)
+    print("       PIPELINE WEB SCRAPING - E-COMMERCE")
+    print("=" * 55)
 
-    brut = extraire_citations(pages=3)
-    print(f"\nCitations extraites : {len(brut)}")
+    conn = None
 
-    propres = transformer(brut)
-    print(f"Après nettoyage : {len(propres)}")
+    try:
+        # 1. Extraction
+        print("\n[1/3] EXTRACTION")
+        donnees_brutes = extraire_donnees()
 
-    conn = initialiser_base(DB_PATH)
-    nb = charger(conn, propres)
-    print(f"Chargées dans {DB_PATH} : {nb}")
+        # 2. Transformation
+        print("\n[2/3] TRANSFORMATION")
+        donnees_propres = transformer(donnees_brutes)
 
-    afficher_resume(conn)
-    conn.close()
-    print("\nPipeline terminé.")
+        # 3. Chargement
+        print("\n[3/3] CHARGEMENT SQLITE")
+        conn = initialiser_base(DB_PATH)
+        resultat = charger(conn, donnees_propres)
+
+        print(f"Produits traités : {resultat['products_processed']}")
+        print(f"Avis traités : {resultat['reviews_processed']}")
+        print(f"Nouveaux avis insérés : {resultat['reviews_inserted']}")
+
+        afficher_statistiques(conn)
+
+        print(f"\nBase de données : {DB_PATH}")
+        print("\nPIPELINE TERMINÉ.")
+
+    except Exception as erreur:
+        print(f"\nERREUR PIPELINE : {erreur}")
+        raise
+
+    finally:
+        if conn:
+            conn.close()
 
 
 if __name__ == "__main__":

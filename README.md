@@ -1,53 +1,36 @@
-# Web Scraping — Citations
+# Pipeline Web Scraping — Avis E-commerce
 
-> Pipeline de scraping web sur un site public (quotes.toscrape.com), nettoyage et stockage SQL.
+Pipeline ETL Python de collecte, nettoyage et stockage de produits et avis clients depuis web-scraping.dev.
 
-**Statut** : 🟢 Réalisé  
-**Catégorie** : 📥 Système de collecte et de stockage  
-**Portfolio** : [Profil GitHub](https://github.com/ousmajalloh405-eng)
+## Objectif
+Collecter les produits et leurs avis pour préparer leur analyse.
 
----
+## Architecture
+- Extract : catalogue HTML, fiches produits et API paginée.
+- Transform : nettoyage et validation.
+- Load : stockage relationnel SQLite.
 
-## 1. Problème métier
+## Technologies
+Python, Requests, BeautifulSoup, API JSON, SQLite et SQL.
 
-Collecter automatiquement des données publiques (citations) pour analyse ultérieure.
+## Résultats
+- 25 produits collectés.
+- 96 avis validés.
+- Note moyenne : 4,36/5.
+- Deuxième exécution : 0 nouvel avis inséré.
 
-## 2. Architecture
+## Base de données
 
-```
-quotes.toscrape.com
-        │
-        ▼
-   extract.py (BeautifulSoup)
-        │
-        ▼
-  transform.py
-        │
-        ▼
-    load.py → citations.db
-```
+### products
+product_id (PK), name, description, catalog_price, detail_price, image_url, product_url.
 
-## 3. Technologies
+### reviews
+review_id (PK), product_id (FK), text, rating, review_date.
 
-- Python 3
-- `requests` + `BeautifulSoup`
-- SQLite
-
-## 4. Installation et exécution
+## Installation
 
 ```bash
-git clone https://github.com/ousmajalloh405-eng/web-scraping.git
-cd web-scraping
-python3 -m venv venv && source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 python3 main.py
-```
-
-## 5. Compétences pour le CV
-
-Développement d’un pipeline de web scraping Python avec BeautifulSoup, nettoyage des données et stockage relationnel.
-
----
-
-*Projet réalisé dans le cadre de la formation Data — Sonatel Academy.*  
-*Site utilisé : quotes.toscrape.com (site de pratique).*
